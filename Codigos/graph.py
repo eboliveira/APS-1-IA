@@ -136,7 +136,7 @@ class Graph(object):
             if key.get_name() == name:
                 return
 
-        new_vertex = vertex.Vertex(name, value=None)
+        new_vertex = vertex.Vertex(name, value=value)
         self.__adjacent_list[new_vertex] = []
 
     def get_vertex(self, name):
