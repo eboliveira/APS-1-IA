@@ -1,6 +1,6 @@
 import sys
-import graph
-# import sklearn
+import utils
+import genetico
 
 
 def main(argv):
@@ -10,28 +10,31 @@ def main(argv):
         content = file.readline().strip('\n').split(': ')
         header[content[0]] = content[1]
     file.readline()
-    tsp = graph.Graph()
+    matriz = [[0 for i in range(0, int(header['DIMENSION']) + 1)] for i in range(0, int(header['DIMENSION']) + 1)]
+    coordenadas = [0 for i in range(0, int(header['DIMENSION']) + 1)]
+
     for i in range(int(header['DIMENSION'])):
         line = file.readline()
         line = line.strip('\n')
         content = line.split(' ')
-        name = content[0]
-        value = content[1] + ' ' + content[2]
-        tsp.add_vertex(name, value)
+        id = content[0]
+        coordenadas[int(id)] = content[1] + ' ' + content[2]
 
+    
     for origem in range(1, int(header['DIMENSION']) + 1):
         for destino in range(1, int(header['DIMENSION']) + 1):
             if origem != destino:
-                vertex_origem = tsp.get_vertex(str(origem))
-                vertex_destino = tsp.get_vertex(str(destino))
-                tsp.add_edge(vertex_origem, vertex_destino,
-                            #  value=sklearn.metrics.pairwise.paired_distances(
-                            #      vertex_origem.get_value().split(' '),
-                            #      vertex_destino.get_value().split(' '),
-                            #      metric='euclidian')
-                                 )
-        tsp.print_adjacent_list()
-
+                origem_cordenates = coordenadas[origem].split(' ')
+                destino_cordenates = coordenadas[destino].split(' ')
+                x = [float(origem_cordenates[0]), float(destino_cordenates[0])]
+                y = [float(origem_cordenates[1]), float(destino_cordenates[1])]
+                matriz[origem][destino] = utils.distancia_euclidiana(x, y)
+    
+    pop = genetico.gerar_populacao(100, int(header['DIMENSION']))
+    genetico.random_select(pop, genetico.fitness, matriz)
+    resultados = genetico.genetico(pop, genetico.fitness, 10000, 5, matriz)
+    for resultado in resultados:
+        print resultado
 
 
 if __name__ == "__main__":
