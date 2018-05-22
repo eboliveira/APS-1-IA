@@ -81,26 +81,36 @@ def crossover_alternativo(p1, p2):
 
 
 def mutacao(x):
-    # mutacao 1
-    index = random.sample(range(0, len(x)), 2)
-    aux = x[index[0]]
-    x[index[0]] = x[index[1]]
-    x[index[1]] = aux
 
+    rand = random.random()
+    if rand >= 0.5:
+        # mutacao 1
+        index = random.sample(range(0, len(x)), 2)
+        aux = x[index[0]]
+        x[index[0]] = x[index[1]]
+        x[index[1]] = aux
+    else:
+        #mutacao 2
+        index = random.randrange(0,len(x))
+        aux = index     #index do vet a ser trocado
+        if x[index] %2 == 0:
+            while x[aux%len(x)] %2 != 0:
+                aux+=1
+            aux2 = x[aux]
+            x[aux] = x[index]
+            x[index] = aux2
+        else:
+            while x[aux%len(x)] %2 == 0:
+                aux+=1
+            aux2 = x[aux]
+            x[aux] = x[index]
+            x[index] = aux2
     return x
 
 
-def mutacao2(x):
-    # mutacao 2
-    for i in range(1, len(x)):
-        aux = x[i-1]
-        x[i-1] = x[i]
-        x[i] = aux
-
-    return x
 
 
-def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=False, mutacao_alternativa=False, elitismo=False):
+def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=False, elitismo=False):
     pop = pop_inicial
     fit = map((lambda x: f(x, matriz)), pop)
 
@@ -124,10 +134,7 @@ def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=F
 
             r = random.randrange(0, 100)
             if r < tx_mutacao:
-                if mutacao_alternativa:
-                    novo = mutacao2(novo)
-                else:
-                    novo = mutacao(novo)
+                mutacao(novo)
             p_nova.append(novo)
 
         if elitismo:
@@ -161,4 +168,3 @@ def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=F
 
 if __name__ == '__main__':
     print(mutacao([1, 3, 5, 8, 2, 9, 6, 7, 4, 10]))
-    print(mutacao2([1, 3, 5, 8, 2, 9, 6, 7, 4, 10]))
