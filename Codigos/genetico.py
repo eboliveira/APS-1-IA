@@ -47,7 +47,7 @@ def crossover(p1, p2):
     # inicia p com um uma quantidade aleatoria de numeros aleatorios e ordena
     p = random.sample(range(0, len(p1)), random.randint(1, len(p1)-1))
     p.sort()
-    p = [3, 5, 6, 9]
+
     s = []
 
     # para cada elemento de p.. inserir em s o elemento correspondente em p1
@@ -67,42 +67,91 @@ def crossover(p1, p2):
     return filho
 
 
+def crossover_alternativo(p1, p2):
+    # cria um filho
+    filho = copy.copy(p1)
+
+    corte = random.randrange(1, len(p1))
+
+    for i in range(corte, len(p1)):
+        if (p2[i] not in filho[0:i]):
+            filho[filho.index(p2[i])] = filho[i]
+            filho[i] = p2[i]
+    return filho
+
+
 def mutacao(x):
-    i = random.randint(1, 2)
-    if i == 1:
-        # mutacao 1
-        index = random.sample(range(0, len(x)), 2)
-        aux = x[index[0]]
-        x[index[0]] = x[index[1]]
-        x[index[1]] = aux
-    else:
-        # mutacao 2
-        pass
+    # mutacao 1
+    index = random.sample(range(0, len(x)), 2)
+    aux = x[index[0]]
+    x[index[0]] = x[index[1]]
+    x[index[1]] = aux
 
     return x
 
-def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, elitismo=False):
+
+def mutacao2(x):
+    # mutacao 2
+    for i in range(1, len(x)):
+        aux = x[i-1]
+        x[i-1] = x[i]
+        x[i] = aux
+
+    return x
+
+
+def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=False, mutacao_alternativa=False, elitismo=False):
     pop = pop_inicial
     fit = map((lambda x: f(x, matriz)), pop)
-    
+
     fit_melhor_caminho = min(fit)
 
     melhor_caminho = pop[fit.index(fit_melhor_caminho)]
 
-
+    n = 0
     for gen in range(n_iter):
         p_nova = []
         for i in range(len(pop_inicial)):
+            n += 1
+            print(n)
             x = random_select(pop, f, matriz)
             y = random_select(pop, f, matriz)
-            novo = crossover(x, y)
+
+            if crossover_alternativo:
+                novo = crossover_alternativo(x, y)
+            else:
+                novo = crossover(x, y)
+
             r = random.randrange(0, 100)
             if r < tx_mutacao:
-                novo = mutacao(novo)
+                if mutacao_alternativa:
+                    novo = mutacao2(novo)
+                else:
+                    novo = mutacao(novo)
             p_nova.append(novo)
-        pop = p_nova
+
+        if elitismo:
+
+            pop_sort = copy.copy(fit)
+            pop_sort.sort(reverse=True)
+
+            filhos = []
+            for i in p_nova:
+                filhos.append(f(i, matriz))
+
+            for pai in pop_sort:
+                menor = float('inf')
+                for filho in filhos:
+                    if pai > filho:
+                        if (p_nova[filhos.index(filho)] not in pop):
+                            if filho < menor:
+                                menor = filho
+                if menor != float('inf'):
+                    pop[fit.index(pai)] = p_nova[filhos.index(menor)]
+        else:
+            pop = p_nova
         fit = map((lambda x: f(x, matriz)), pop)
-        
+
         if min(fit) < fit_melhor_caminho:
             fit_melhor_caminho = min(fit)
             melhor_caminho = pop[fit.index(fit_melhor_caminho)]
@@ -111,4 +160,5 @@ def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, elitismo=False):
 
 
 if __name__ == '__main__':
-    print crossover([1, 3, 5, 8, 2, 9, 6, 7, 4, 10], [5, 1, 8, 2, 9, 10, 7, 3, 4, 6])
+    print(mutacao([1, 3, 5, 8, 2, 9, 6, 7, 4, 10]))
+    print(mutacao2([1, 3, 5, 8, 2, 9, 6, 7, 4, 10]))
