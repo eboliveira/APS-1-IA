@@ -108,12 +108,14 @@ def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=F
 
     melhor_caminho = pop[fit.index(fit_melhor_caminho)]
 
+    n_maximo_sem_mudancas = 0
     n = 0
-    for gen in range(n_iter):
+    while n_maximo_sem_mudancas < n_iter:
         p_nova = []
+        print n_maximo_sem_mudancas
         for i in range(len(pop_inicial)):
             n += 1
-            print(n)
+            # print(n)
             x = random_select(pop, f, matriz)
             y = random_select(pop, f, matriz)
 
@@ -155,6 +157,10 @@ def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=F
         if min(fit) < fit_melhor_caminho:
             fit_melhor_caminho = min(fit)
             melhor_caminho = pop[fit.index(fit_melhor_caminho)]
+            n_maximo_sem_mudancas = 0
+        else:
+            n_maximo_sem_mudancas += 1
+
 
     return fit_melhor_caminho, melhor_caminho
 
