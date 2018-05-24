@@ -80,9 +80,14 @@ def crossover_alternativo(p1, p2):
     return filho
 
 
-def mutacao(x, id):
-
+def mutacao(x, id = 3):
     if id == 1:
+        id = 0
+    elif id == 2:
+        id = 1
+    else:
+        id = random.random()
+    if id <0.5:
         # mutacao 1
         # troca duas posicoes de lugar
 
@@ -93,22 +98,25 @@ def mutacao(x, id):
     else:
         # mutacao 2
 
-        # pega uma posicao aleatoria
-        index = random.randrange(0, len(x))
-        aux = index  # index do vet a ser trocado
-        
-        if x[index] % 2 == 0:
-            while x[aux % len(x)] % 2 != 0:
+        index = random.randrange(0, len(x))     #sorteia uma posicao aleatoria do vetor
+        aux = index+1                           #armazena a proxima posicao da sorteada
+        print x
+        print x[index]
+
+        if x[index] % 2 == 0:                   #se o valor da posicao sorteada for par
+            while x[aux % len(x)] % 2 != 0:     #enquanto a proxima posicao for impar (logica de lista circular)
                 aux += 1
-            aux2 = x[aux]
-            x[aux] = x[index]
-            x[index] = aux2
-        else:
-            while x[aux % len(x)] % 2 == 0:
-                aux += 1
-            aux2 = x[aux]
-            x[aux] = x[index]
-            x[index] = aux2
+            aux = aux%len(x)                    #volta o aux para posicao de vetor
+            aux2 = x[aux]                       #
+            x[aux] = x[index]                   #Troca indice sorteado com o proximo valor par encontrado
+            x[index] = aux2                     #
+        else:                                   #se o valor da posicao sorteada for impar
+            while x[aux % len(x)] % 2 == 0:     #enquanto a proxima posicao for par (logica de lista circular)
+                aux += 1        
+            aux = aux%len(x)                    #Volta o aux para posicao de vetor
+            aux2 = x[aux]                       #
+            x[aux] = x[index]                   #Troca indice sorteado com o proximo valor impar encontrado
+            x[index] = aux2                     #
     return x
 
 
@@ -203,4 +211,4 @@ def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=F
 
 
 if __name__ == '__main__':
-    print(mutacao([1, 3, 5, 8, 2, 9, 6, 7, 4, 10]))
+    print(mutacao([1, 3, 5, 8, 2, 9, 6, 7, 4, 10],2))
