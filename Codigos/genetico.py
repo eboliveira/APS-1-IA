@@ -100,9 +100,6 @@ def mutacao(x, id = 3):
 
         index = random.randrange(0, len(x))     #sorteia uma posicao aleatoria do vetor
         aux = index+1                           #armazena a proxima posicao da sorteada
-        print x
-        print x[index]
-
         if x[index] % 2 == 0:                   #se o valor da posicao sorteada for par
             while x[aux % len(x)] % 2 != 0:     #enquanto a proxima posicao for impar (logica de lista circular)
                 aux += 1
