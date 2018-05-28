@@ -1,4 +1,5 @@
 import random
+import matplotlib.pyplot as plt
 import copy
 
 
@@ -71,23 +72,31 @@ def crossover_alternativo(p1, p2):
     # cria um filho
     filho = copy.copy(p1)
 
+    # define um corte de maneira aleatoria
     corte = random.randrange(1, len(p1))
 
     for i in range(corte, len(p1)):
+        # verifica se P2[i] esta entre as posicoes 0 e corte do vetor filho
         if (p2[i] not in filho[0:i]):
+            # caso nao esteja
+
+            # o valor de filho[i] substitui a posicao que tem o valor igual
+            # a p2[i] no vetor filho
             filho[filho.index(p2[i])] = filho[i]
+            
+            # agora filho[i] recebe p2[i]
             filho[i] = p2[i]
     return filho
 
 
-def mutacao(x, id = 3):
+def mutacao(x, id=3):
     if id == 1:
         id = 0
     elif id == 2:
         id = 1
     else:
         id = random.random()
-    if id <0.5:
+    if id < 0.5:
         # mutacao 1
         # troca duas posicoes de lugar
 
@@ -98,31 +107,35 @@ def mutacao(x, id = 3):
     else:
         # mutacao 2
 
-        index = random.randrange(0, len(x))     #sorteia uma posicao aleatoria do vetor
-        aux = index+1                           #armazena a proxima posicao da sorteada
-        print x
-        print x[index]
+        # sorteia uma posicao aleatoria do vetor
+        index = random.randrange(0, len(x))
+        # armazena a proxima posicao da sorteada
+        aux = index + 1
 
-        if x[index] % 2 == 0:                   #se o valor da posicao sorteada for par
-            while x[aux % len(x)] % 2 != 0:     #enquanto a proxima posicao for impar (logica de lista circular)
+        if x[index] % 2 == 0:  # se o valor da posicao sorteada for par
+            # enquanto a proxima posicao for impar (logica de lista circular)
+            while x[aux % len(x)] % 2 != 0:
                 aux += 1
-            aux = aux%len(x)                    #volta o aux para posicao de vetor
-            aux2 = x[aux]                       #
-            x[aux] = x[index]                   #Troca indice sorteado com o proximo valor par encontrado
-            x[index] = aux2                     #
-        else:                                   #se o valor da posicao sorteada for impar
-            while x[aux % len(x)] % 2 == 0:     #enquanto a proxima posicao for par (logica de lista circular)
-                aux += 1        
-            aux = aux%len(x)                    #Volta o aux para posicao de vetor
-            aux2 = x[aux]                       #
-            x[aux] = x[index]                   #Troca indice sorteado com o proximo valor impar encontrado
-            x[index] = aux2                     #
+            aux = aux % len(x)  # volta o aux para posicao de vetor
+            aux2 = x[aux]
+            # Troca indice sorteado com o proximo valor par encontrado
+            x[aux] = x[index]
+            x[index] = aux2
+        else:  # se o valor da posicao sorteada for impar
+            # enquanto a proxima posicao for par (logica de lista circular)
+            while x[aux % len(x)] % 2 == 0:
+                aux += 1
+            aux = aux % len(x)  # Volta o aux para posicao de vetor
+            aux2 = x[aux]
+            # Troca indice sorteado com o proximo valor impar encontrado
+            x[aux] = x[index]
+            x[index] = aux2
     return x
 
 
-def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=False, id_mutacao=1, elitismo=False):
+def genetico(pop_inicial, f, estagnacao, tx_mutacao, matriz, use_crossover_alternativo=False, id_mutacao=1, elitismo=False):
     pop = pop_inicial
-    
+
     # calcula o fit da pop inicial
     fit = map((lambda x: f(x, matriz)), pop)
 
@@ -133,9 +146,13 @@ def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=F
     # inicia o contador de geracoes sem mudancas
     n_maximo_sem_mudancas = 0
 
+    # plot grafico
+    min_fits = []
+    med_fits = []
+
     # sera processado geracoes ate ocorrer um caso onde nao exista
     # mais melhorias por x geracoes
-    while n_maximo_sem_mudancas < n_iter:
+    while n_maximo_sem_mudancas < estagnacao:
         p_nova = []
         print(n_maximo_sem_mudancas)
 
@@ -146,7 +163,7 @@ def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=F
             y = random_select(pop, f, matriz)
 
             # realiza a reproducao
-            if crossover_alternativo:
+            if use_crossover_alternativo:
                 novo = crossover_alternativo(x, y)
             else:
                 novo = crossover(x, y)
@@ -155,7 +172,7 @@ def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=F
             r = random.randrange(0, 100)
             if r < tx_mutacao:
                 mutacao(novo, id_mutacao)
-            
+
             # insere filho na nova pop
             p_nova.append(novo)
 
@@ -193,6 +210,9 @@ def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=F
             # a nova populacao substitui a pop original
             pop = p_nova
 
+        min_fits.append(min(fit))
+        med_fits.append(sum(fit)/len(fit))
+
         # calcular a fit da nova geracao
         fit = map((lambda x: f(x, matriz)), pop)
 
@@ -207,8 +227,17 @@ def genetico(pop_inicial, f, n_iter, tx_mutacao, matriz, crossover_alternativo=F
             # caso contrario, aumenta o contador de geracoes sem mudancas
             n_maximo_sem_mudancas += 1
 
-    return fit_melhor_caminho, melhor_caminho
+    # plot grafico
+    plt.figure()
+    plt.plot(min_fits, label='Fitness minimos')
+    plt.plot(med_fits, label="Fitnes medio")
+    plt.legend()
+    plt.ylabel('Fitness')
+    plt.xlabel('geracoes')
+    plt.show()
+
+    return fit_melhor_caminho, melhor_caminho, len(min_fits)
 
 
 if __name__ == '__main__':
-    print(mutacao([1, 3, 5, 8, 2, 9, 6, 7, 4, 10],2))
+    print(mutacao([1, 3, 5, 8, 2, 9, 6, 7, 4, 10], 2))

@@ -13,11 +13,12 @@ def main(argv):
     matriz = utils.gerar_matriz(header, coordenadas)
 
     # gera uma populacao inicial
-    pop = genetico.gerar_populacao(100, int(header['DIMENSION']))
-
+    pop = genetico.gerar_populacao(200, int(header['DIMENSION']))
 
     resultados = genetico.genetico(
-        pop, genetico.fitness, 100, 5, matriz, elitismo=True)
+        pop, genetico.fitness, 15, 5, matriz, elitismo=False, use_crossover_alternativo=True, id_mutacao=2)
+    print 'alt 2'
+    print(header['NAME'])
     for resultado in resultados:
         print(resultado)
 
