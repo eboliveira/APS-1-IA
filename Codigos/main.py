@@ -17,7 +17,6 @@ def main(argv):
 
     resultados = genetico.genetico(
         pop, genetico.fitness, 15, 5, matriz, elitismo=False, use_crossover_alternativo=True, id_mutacao=2)
-    print 'alt 2'
     print(header['NAME'])
     for resultado in resultados:
         print(resultado)
